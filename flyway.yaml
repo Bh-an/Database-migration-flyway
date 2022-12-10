@@ -1,0 +1,54 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: webapp-config
+data:
+  rds_endpoint: terraform-20221209024708000200000002.chynyo8bm3to.us-east-1.rds.amazonaws.com
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+type: Opaque
+stringData:
+  MYSQL_ROOT_USER: tfk8
+  MYSQL_ROOT_PASSWORD: tfk8password
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: flyway
+
+spec:      
+  initContainers:
+  - name: schema-migration
+    image: csye7125group01/db_migration:latest
+    
+    envFrom:
+    - secretRef:
+        name: db-secret
+    env:
+      - name: FLYWAY_DEFAULT_SCHEMA
+        value: csye7125
+    
+      - name: RDS_ENDPOINT
+        valueFrom:
+          configMapKeyRef:
+            name: webapp-config
+            key: rds_endpoint
+
+    command: ["flyway", "migrate", "-url=jdbc:mysql://$(RDS_ENDPOINT):3306", "-user=$(MYSQL_ROOT_USER)", "-password=$(MYSQL_ROOT_PASSWORD)"]
+
+  containers:
+    - name: busybox
+      image: busybox
+      imagePullPolicy: IfNotPresent
+      
+      command: ['sh', '-c', 'echo Container 1 is Running ; sleep 3600']
+
+  imagePullSecrets:
+      - name: regcred
