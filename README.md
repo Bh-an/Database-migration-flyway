@@ -39,7 +39,7 @@ kubectl delete pod db-baseline
 ```
 kubectl apply -f flyway.yaml
 ```
-This starts the migration, using the dockerfile pushed earlier as a template. To further modify, dockerfile should be updated with .sql files and deployment should be rerun
+> This starts the migration, using the dockerfile pushed earlier as a template. To further modify, dockerfile should be updated with .sql files and deployment should be rerun
 
 - Testing:
 ```
